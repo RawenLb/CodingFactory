@@ -1,0 +1,36 @@
+package tn.esprit.gateway;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.gateway.route.RouteLocator;
+import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+@EnableDiscoveryClient
+public class GatewayApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(GatewayApplication.class, args);
+    }
+    @Bean
+    public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
+        return builder.routes()
+                .route("AuthenticationMicroService", r -> r.path("/AuthenticationMicroService/**")
+                        .filters(f -> f.stripPrefix(1)) // Removes '/AuthenticationMicroService' before forwarding
+                            .uri("lb://AUTHENTICATIONMICROSERVICE"))
+                .route("MIcroserviceEvaluation", r -> r.path("/evaluations/**")
+                        .uri("lb://MICROSERVICEEVALUATION")) // Doit correspondre au nom dans Eureka
+                .route("FormationMS", r->r.path("/api/formations/**")
+                        .uri("lb://FormationMS") )
+                .route("RessourceMicroService",r->r.path("/api/ressources/**")
+                        .uri("lb://RESSOURCEMICROSERVICE") )
+                .route("ACCOMPAGNEMENTPFEMICROSERVICE",r->r.path("/api/accompagnement/**")
+                        .uri("lb://ACCOMPAGNEMENTPFEMICROSERVICE") )
+
+                .build();
+    }
+
+
+}
